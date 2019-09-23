@@ -1,0 +1,6 @@
+1|true|Hyderabad|santhosh@deloitte.com|9123456789|Santhosh Chandra|0
+2|true|Delhi|saurabh@deloitte.com|9123456123|Saurabh|0
+3|false|Bangalore|hari@deloitte.com|9123123123|Hari|0
+4|true|Punjab|deepak@deloitte.com|9123412345|Deepak|0
+5|true|Goa|chandra@deloitte.com|9321321321|Chandra|0
+6|false|Mysore|dinesh@deloitte.com|8123321123|dinesh|0

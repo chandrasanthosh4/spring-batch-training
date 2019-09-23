@@ -34,11 +34,11 @@ public class ExportFileToDbBatchJobApp {
 			//was any job instance(with the same job parameters) thats already 
 			//completed and if it come to know "yes", then it returns "COMPLETED" status
 			JobParameter currentDateJobParam = new JobParameter(new Date());
-			JobParameter inputFileLocationJobParam = new JobParameter("C://Users//sapenumarthi//batchjobs//customer.txt");
+			JobParameter inputFolderLocationJobParam = new JobParameter("C://Users//sapenumarthi//batchjobs//");
 			
 			Map<String, JobParameter> parameters = new ConcurrentHashMap<String, JobParameter>();
 			parameters.put("JOB_PARAM_DATE", currentDateJobParam);
-			parameters.put("JOB_PARAM_INPUT_FILE_LOC", inputFileLocationJobParam);
+			parameters.put("JOB_PARAM_INPUT_FOLDER_LOC", inputFolderLocationJobParam);
 			
 			JobParameters jobParameters = new JobParameters(parameters);
 			JobExecution execution = jobLauncher.run(job, jobParameters);

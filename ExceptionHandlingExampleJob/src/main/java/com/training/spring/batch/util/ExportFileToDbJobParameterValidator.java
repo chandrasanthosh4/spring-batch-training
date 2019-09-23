@@ -15,10 +15,9 @@ public class ExportFileToDbJobParameterValidator implements JobParametersValidat
 		if(Optional.ofNullable(parameters).isPresent() && !parameters.isEmpty()) {
 			if(!parameters.getParameters().containsKey("JOB_PARAM_DATE")) {
 				throw new JobParametersInvalidException("Job parameter 'JOB_PARAM_DATE' is missing. Exiting the Job !!");
-			} else if(!parameters.getParameters().containsKey("JOB_PARAM_INPUT_FILE_LOC")) {
-				throw new JobParametersInvalidException("Job parameter 'JOB_PARAM_INPUT_FILE_LOC' is missing. Exiting the Job !!");
+			} else if(!parameters.getParameters().containsKey("JOB_PARAM_INPUT_FOLDER_LOC")) {
+				throw new JobParametersInvalidException("Job parameter 'JOB_PARAM_INPUT_FOLDER_LOC' is missing. Exiting the Job !!");
 			}
 		}
 	}
-
 }

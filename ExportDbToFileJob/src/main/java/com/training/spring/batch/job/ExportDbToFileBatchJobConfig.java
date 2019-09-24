@@ -5,16 +5,17 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.quartz.DisallowConcurrentExecution;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -23,9 +24,8 @@ import org.springframework.jdbc.core.RowMapper;
 import com.training.spring.batch.entity.Customer;
 
 @Configuration
-@DisallowConcurrentExecution
-public class ExportDbToFileQuartzBatchJobConfig {
-
+public class ExportDbToFileBatchJobConfig {
+	
 	@Autowired
 	private JobBuilderFactory jobBuilderFactory;
 
@@ -34,9 +34,10 @@ public class ExportDbToFileQuartzBatchJobConfig {
 
 	@Autowired
 	private DataSource dataSource;
-	
+
 	/**
 	 * Job Configuration
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
@@ -46,18 +47,21 @@ public class ExportDbToFileQuartzBatchJobConfig {
 	}
 
 	/**
-	 * Step Configuration with the chunk(no of records to process in bulk at once) value 1
+	 * Step Configuration with the chunk(no of records to process in bulk at once)
+	 * value 1
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	@Bean
 	public Step dbToFileStepConfiguration() throws Exception {
 		return stepBuilderFactory.get("ExportDbToFileStep").<Customer, Customer>chunk(1).reader(dbRecordReader())
-				.writer(fileRecordWriter()).build();
+				.writer(fileRecordWriter(null)).build();
 	}
 
 	/**
 	 * ItemReader Configuration to read records from DB
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
@@ -65,7 +69,7 @@ public class ExportDbToFileQuartzBatchJobConfig {
 	public JdbcCursorItemReader<Customer> dbRecordReader() throws Exception {
 		JdbcCursorItemReader<Customer> ir = new JdbcCursorItemReader<Customer>();
 		ir.setDataSource(dataSource);
-		//"batch_quartz" is a database in MySqsl DB
+		// "batch" is a database in MySqsl DB
 		ir.setSql("SELECT * FROM batch.customer");
 		ir.setRowMapper(new RowMapper<Customer>() {
 			@Override
@@ -86,14 +90,17 @@ public class ExportDbToFileQuartzBatchJobConfig {
 
 	/**
 	 * ItemWriter Configuration to write the records that are read from ItemReader
+	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	@Bean
-	public FlatFileItemWriter<Customer> fileRecordWriter() throws Exception {
+	@StepScope
+	public FlatFileItemWriter<Customer> fileRecordWriter(
+			@Value("#{jobParameters['JOB_PARAM_INPUT_FILE_LOC']}") String inputFileLocation) throws Exception {
 		FlatFileItemWriter<Customer> iw = new FlatFileItemWriter<Customer>();
-		//The complete file path to write the data
-		iw.setResource(new FileSystemResource("C://Users//sapenumarthi//batchjobs//customer_db_to_file.txt"));
+		// The complete file path to write the data
+		iw.setResource(new FileSystemResource(inputFileLocation));
 		iw.setShouldDeleteIfExists(true);
 		iw.setAppendAllowed(true);
 		DelimitedLineAggregator<Customer> dla = new DelimitedLineAggregator<Customer>();

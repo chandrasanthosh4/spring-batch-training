@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 @JobScope
 public class ExportFileToDbBatchJobExecDecider implements JobExecutionDecider {
-
+	
 	@Value("#{jobParameters['JOB_PARAM_INPUT_FILE_LOC']}")
 	private String inputFileLocation;
 

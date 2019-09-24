@@ -22,10 +22,7 @@ import org.springframework.validation.BindException;
 
 import com.training.spring.batch.dao.CustomerDao;
 import com.training.spring.batch.entity.Customer;
-import com.training.spring.batch.exception.ValidationBusinessException;
 import com.training.spring.batch.pojo.CustomerRecord;
-import com.training.spring.batch.util.CustomerRecordProcessor;
-import com.training.spring.batch.util.ExportFileToDbJobParameterValidator;
 
 @Configuration
 public class ExportFileToDbBatchJobConfig {
@@ -37,16 +34,13 @@ public class ExportFileToDbBatchJobConfig {
 	private StepBuilderFactory stepBuilderFactory;
 
 	@Autowired
-	private ExportFileToDbJobParameterValidator exportFileToDbJobParameterValidator;
-
-	@Autowired
-	private CustomerRecordProcessor customerRecordProcessor;
-
-	@Autowired
 	private ExportFileToDbBatchJobExecDecider exportFileToDbBatchJobExecDecider;
 	
 	@Autowired
 	private ExportFileToDbFileArchivalTasklet exportFileToDbFileArchivalTasklet;
+	
+	@Autowired
+	private CustomerRecordProcessor customerRecordProcessor;
 	
 	@Autowired
 	private CustomerDao customerDao;
@@ -60,21 +54,12 @@ public class ExportFileToDbBatchJobConfig {
 	@Bean("ExportFileToDbJob")
 	public Job dbToFileJobConfiguration() throws Exception {
 		return jobBuilderFactory.get("ExportFileToDbJob")
-				.validator(exportFileToDbJobParameterValidator)
 				.start(fileToDbStepConfiguration())
 				.next(exportFileToDbBatchJobExecDecider).on("COMPLETED").to(getFileArchivalTasklet())
 				.from(exportFileToDbBatchJobExecDecider).on("FAILED").end().build()
 				.build();
 	}
 	
-	@Bean("fileArchTasklet")
-	public Step getFileArchivalTasklet() {
-		return stepBuilderFactory.get("fileArchTasklet")
-				.tasklet(exportFileToDbFileArchivalTasklet)
-				.allowStartIfComplete(false)
-				.build();
-	}
-
 	/**
 	 * Step Configuration with the chunk(no of records to process in bulk at once)
 	 * value 1
@@ -89,9 +74,14 @@ public class ExportFileToDbBatchJobConfig {
 				.reader(fileRecordReader(null))
 				.processor(customerRecordProcessor)
 				.writer(dbRecordWriter())
-				.faultTolerant()
-				.skipLimit(3)
-				.skip(ValidationBusinessException.class)
+				.allowStartIfComplete(false)
+				.build();
+	}
+	
+	@Bean("fileArchTasklet")
+	public Step getFileArchivalTasklet() {
+		return stepBuilderFactory.get("fileArchTasklet")
+				.tasklet(exportFileToDbFileArchivalTasklet)
 				.allowStartIfComplete(false)
 				.build();
 	}

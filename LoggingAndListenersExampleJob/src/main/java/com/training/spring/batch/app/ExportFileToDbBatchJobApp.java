@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameter;
@@ -17,6 +19,8 @@ import com.training.spring.batch.config.BatchConfig;
 
 @SpringBootApplication(scanBasePackageClasses = BatchConfig.class)
 public class ExportFileToDbBatchJobApp {
+	
+	public static final Logger LOGGER = LoggerFactory.getLogger(ExportFileToDbBatchJobApp.class);
 
 	public static void main(String[] args) {
 		
@@ -34,19 +38,18 @@ public class ExportFileToDbBatchJobApp {
 			//was any job instance(with the same job parameters) thats already 
 			//completed and if it come to know "yes", then it returns "COMPLETED" status
 			JobParameter currentDateJobParam = new JobParameter(new Date());
-			JobParameter inputFolderLocationJobParam = new JobParameter("C://Users//sapenumarthi//batchjobs//");
+			JobParameter inputFileLocationJobParam = new JobParameter("C://Users//sapenumarthi//batchjobs//customer.txt");
 			
 			Map<String, JobParameter> parameters = new ConcurrentHashMap<String, JobParameter>();
 			parameters.put("JOB_PARAM_DATE", currentDateJobParam);
-			parameters.put("JOB_PARAM_INPUT_FOLDER_LOC", inputFolderLocationJobParam);
+			parameters.put("JOB_PARAM_INPUT_FILE_LOC", inputFileLocationJobParam);
 			
 			JobParameters jobParameters = new JobParameters(parameters);
 			JobExecution execution = jobLauncher.run(job, jobParameters);
-			System.out.println("Batch Status : " + execution.getStatus());
+			LOGGER.info("Batch Status : " + execution.getStatus());
 		} catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
+			LOGGER.error("Error: " + e.getMessage());
 		}
-		System.out.println("Done");
 	}
 
 }
